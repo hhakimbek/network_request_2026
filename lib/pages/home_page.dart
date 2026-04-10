@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:network_request_2026/pages/detail_page.dart';
 import '../model/post_model.dart';
 import '../services/http_service.dart';
 
@@ -62,6 +63,7 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context, index) {
                 final post = posts[index];
                 return ListTile(
+                  onTap: () => Navigator.push(context,MaterialPageRoute(builder: (context) => DetailPage(postId: post.id),)),
                   leading: Text("#${post.id}"),
                   title: Text(post.title),
                   subtitle: Text(post.body),
