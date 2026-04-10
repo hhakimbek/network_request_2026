@@ -2,42 +2,61 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:network_request_2026/model/post_model.dart';
 import 'package:network_request_2026/services/http_service.dart';
 
-class CreatePostPage extends StatefulWidget {
-  const CreatePostPage({super.key,});
+class EditPostPage extends StatefulWidget {
+  final Post post;
+  const EditPostPage({super.key, required this.post});
 
   @override
-  State<CreatePostPage> createState() => _CreatePostPageState();
+  State<EditPostPage> createState() => _EditPostPageState();
 }
 
-class _CreatePostPageState extends State<CreatePostPage> {
+class _EditPostPageState extends State<EditPostPage> {
 
   TextEditingController bodyCtrl = TextEditingController();
   TextEditingController titleCtrl = TextEditingController();
-  TextEditingController idCtrl = TextEditingController();
 
-  bool isLoading = false;
+  late Post post;
+  bool isLoading = true;
   bool isChange = false;
+  @override
+  void initState() {
+    _init();
+    super.initState();
+  }
 
-  void _createPost() {
-    String title = titleCtrl.text.trim();
-    String body = bodyCtrl.text.trim();
-    String id = idCtrl.text.trim();
-    if(title.isEmpty || body.isEmpty || id.isEmpty) {
+  void _init() {
+    post = widget.post;
+    bodyCtrl.text = post.body;
+    titleCtrl.text = post.title;
+    isLoading = false;
+    setState(() {
+
+    });
+  }
+
+  void _updatePost() {
+    String title  = titleCtrl.text.trim();
+    String body  = bodyCtrl.text.trim();
+    if(title.isEmpty || body.isEmpty) {
       print("Malumotlar bo'sh");
       return;
     }
-    Post post = Post(userId: 1, id: int.parse(id), title: title, body: body);
+    if(title==post.title && body==post.body) {
+      print("O'zgarish yo'q");
+      return;
+    }
+    post.body = body;
+    post.title = title;
 
     isLoading = true;
     setState(() {
 
     });
 
-    Network.POST(Network.API_CREATE,post.toJson()).then((value) {
+    Network.PUT("${Network.API_DELETE}/${post.id}",post.toJson()).then((value) {
       isLoading = false;
       isChange = true;
       setState(() {
@@ -58,7 +77,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("#Create Post"),
+          title: Text("#${post.id}"),
         ),
         body: Center(
           child: Padding(
@@ -83,23 +102,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       border: OutlineInputBorder()
                   ),
                 ),
-                Text("Id",style: TextStyle(fontSize: 11,color: Colors.grey),),
-                TextField(
-                  controller: idCtrl,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: InputDecoration(
-                      border: OutlineInputBorder()
-                  ),
-                ),
                 SizedBox(height: 20,),
                 MaterialButton(
                     onPressed: () {
-                      _createPost();
+                      _updatePost();
                     },
                     minWidth: double.infinity,
                     color: Colors.blueAccent,
-                    child: Text("Create",style: TextStyle(color: Colors.white),))
+                    child: Text("Update",style: TextStyle(color: Colors.white),))
               ],
             ),
           ),

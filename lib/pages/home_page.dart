@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:network_request_2026/pages/create_post_page.dart';
 import 'package:network_request_2026/pages/detail_page.dart';
 import '../model/post_model.dart';
 import '../services/http_service.dart';
@@ -70,6 +71,15 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          bool value = await Navigator.push(context, MaterialPageRoute(builder: (context) => CreatePostPage(),));
+          if(value) {
+            _apiPostList();
+          }
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 }

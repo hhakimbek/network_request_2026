@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:network_request_2026/model/post_model.dart';
+import 'package:network_request_2026/pages/edit_post_page.dart';
 import 'package:network_request_2026/services/http_service.dart';
 
 class DetailPage extends StatefulWidget {
@@ -19,7 +20,7 @@ class _DetailPageState extends State<DetailPage> {
   TextEditingController titleCtrl = TextEditingController();
 
   Post post = Post(userId: 0, id: 0, title: "...", body: "...");
-  bool isLoading = true;
+  bool isLoading = false;
 
 
   @override
@@ -29,6 +30,10 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _apiGetPost() {
+    isLoading = true;
+    setState(() {
+
+    });
     Network.GET("${Network.API_LIST}/${widget.postId}").then((value) {
       if(value!=null) {
         Map<String,dynamic> json = jsonDecode(value);
@@ -57,45 +62,27 @@ class _DetailPageState extends State<DetailPage> {
   }
 
 
-  void _updatePost() {
-    String title  = titleCtrl.text.trim();
-    String body  = bodyCtrl.text.trim();
-    if(title.isEmpty || body.isEmpty) {
-      print("Malumotlar bo'sh");
-      return;
-    }
-    if(title==post.title && body==post.body) {
-      print("O'zgarish yo'q");
-      return;
-    }
-    post.body = body;
-    post.title = title;
-
-    isLoading = true;
-    setState(() {
-
-    });
-
-    Network.PUT("${Network.API_DELETE}/${post.id}",post.toJson()).then((value) {
-      isLoading = false;
-      setState(() {
-
-      });
-    },);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(post.id.toString()),
+        title: Text("#${post.id}"),
         actions: [
           IconButton(
             onPressed: () {
               _deletePost();
             },
             icon: Icon(CupertinoIcons.delete,color: Colors.red,),
-          )
+          ),
+          IconButton(
+            onPressed: () async {
+              bool value = await Navigator.push(context, MaterialPageRoute(builder: (context) => EditPostPage(post: post),));
+              if(value) {
+                _apiGetPost();
+              }
+            },
+            icon: Icon(Icons.edit,color: Colors.blue,),
+          ),
         ],
       ),
       body: Center(
@@ -107,28 +94,10 @@ class _DetailPageState extends State<DetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Title",style: TextStyle(fontSize: 11,color: Colors.grey),),
-              TextField(
-                controller: titleCtrl,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder()
-                ),
-              ),
+              Text(post.title),
               SizedBox(height: 20,),
               Text("Body",style: TextStyle(fontSize: 11,color: Colors.grey),),
-              TextField(
-                controller: bodyCtrl,
-                decoration: InputDecoration(
-                    border: OutlineInputBorder()
-                ),
-              ),
-              SizedBox(height: 20,),
-              MaterialButton(
-                onPressed: () {
-                  _updatePost();
-                },
-                minWidth: double.infinity,
-                color: Colors.blueAccent,
-                child: Text("Update",style: TextStyle(color: Colors.white),))
+              Text(post.body),
             ],
           ),
         ),
